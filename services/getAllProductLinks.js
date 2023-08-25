@@ -1,9 +1,10 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
+
+const { en_api } = require('../services/axios-config');
 
 async function getProductLinksFromPage(pageUrl) {
   try {
-    const response = await axios.get(pageUrl);
+    const response = await en_api.get(pageUrl);
     const html = response.data;
     const $ = cheerio.load(html);
 
@@ -26,7 +27,7 @@ async function getAllProductLinks(categoryLink) {
     while (true) {
       process.stdout.write(`${page}\r`);
 
-      const pageUrl = `https://enext.ua${categoryLink}?PAGEN_1=${page}`;
+      const pageUrl = `${categoryLink}?PAGEN_1=${page}`;
       const productLinks = await getProductLinksFromPage(pageUrl);
 
       if (productLinks[0] === allProductLinks[0] || productLinks.length === 0) {

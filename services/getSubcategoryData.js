@@ -1,10 +1,11 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
-const removeSpecialCharacters = require('../utils/removeEscapeCharacters');
+
+const { en_api } = require('./axios-config');
+const { removeEscapeCharacters } = require('../utils');
 
 async function getSubcategoryData(url) {
   try {
-    const response = await axios.get(url);
+    const response = await en_api.get(url);
     const html = response.data;
 
     const categories = [];
@@ -21,7 +22,7 @@ async function getSubcategoryData(url) {
       const name = anchorTag.text().trim();
 
       if (name && link)
-        categories.push({ name: removeSpecialCharacters(name), link });
+        categories.push({ name: removeEscapeCharacters(name), link });
     });
 
     return categories;

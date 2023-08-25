@@ -1,10 +1,11 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
 const { removeEscapeCharacters } = require('../utils');
 
+const { en_api } = require('./axios-config');
+
 async function getCategoryData(url) {
   try {
-    const response = await axios.get(url);
+    const response = await en_api.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
 

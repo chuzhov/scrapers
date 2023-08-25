@@ -1,9 +1,10 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
+
+const { en_api } = require('../services/axios-config');
 
 async function getProductData(productLink) {
   try {
-    const response = await axios.get(productLink);
+    const response = await en_api.get(productLink);
     const html = response.data;
     const $ = cheerio.load(html);
 
