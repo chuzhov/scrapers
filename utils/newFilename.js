@@ -6,9 +6,12 @@ function newFilename(prefix, extension) {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
 
-  const fileName = `${prefix} ${year}-${month}-${day} ${hours}-${minutes}.${extension}`;
+  const filename = `${prefix} ${year}-${month}-${day} ${hours}-${minutes}.${extension}`;
 
-  return fileName;
+  return {
+    filename,
+    dateString: `${year}-${month}-${day} ${hours}-${minutes}`,
+  };
 }
 
 module.exports = newFilename;
