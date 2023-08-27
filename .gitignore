@@ -1,3 +1,6 @@
+# Scrap-reports
+public/*.json
+
 # Logs
 logs
 *.log
