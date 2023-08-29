@@ -56,7 +56,7 @@ function handleSocketConnections(io) {
       const jobId = addJob({
         email: socket.handshake.query.email,
         socketId: socket.id,
-        jobStatus: 'scrapping', // pending, scrapping, finished, accepted
+        jobStatus: 'scrapping', // error, scrapping, finished, accepted
         appStatus: 'connected', //connected, disconnected
       });
       console.log(`Received generation request from ${email}`);
