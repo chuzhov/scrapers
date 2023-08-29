@@ -1,3 +1,4 @@
+const shortid = require('shortid');
 const sessions = require('../db/sessions');
 
 function getJob(prop) {
@@ -7,7 +8,9 @@ function getJob(prop) {
 }
 
 function addJob(data) {
+  data.jobId = shortid.generate();
   sessions.push(data);
+  return data.jobId;
 }
 
 function updateJob(id, data) {

@@ -1,5 +1,4 @@
 const fs = require('fs');
-const shortid = require('shortid');
 
 const scrapEN = require('.');
 const { addJob, getJob, updateJob } = require('./services/jobFunctions');
@@ -11,13 +10,6 @@ function handleSocketConnections(io) {
     const { jobId } = getJob({ email });
 
     if (!jobId) {
-      addJob({
-        email: socket.handshake.query.email,
-        socketId: socket.id,
-        jobId: shortid.generate(),
-        jobStatus: 'pending', // pending, scrapping, finished
-        appStatus: 'connected', //connected, disconnected
-      });
       console.log(`A user ${email} with id ${socket.id} connected`);
     } else {
       updateJob(jobId, { socketId: socket.id, appStatus: 'connected' });
@@ -37,7 +29,6 @@ function handleSocketConnections(io) {
             });
             return;
           }
-
           // Parse the JSON data
           try {
             const parsedData = JSON.parse(data);
@@ -62,10 +53,14 @@ function handleSocketConnections(io) {
     }
 
     socket.on('generateReport', async () => {
-      const { jobId, email } = getJob({ socketId: socket.id });
-      updateJob(jobId, { jobStatus: 'scrapping' });
-
+      const jobId = addJob({
+        email: socket.handshake.query.email,
+        socketId: socket.id,
+        jobStatus: 'scrapping', // pending, scrapping, finished, accepted
+        appStatus: 'connected', //connected, disconnected
+      });
       console.log(`Received generation request from ${email}`);
+
       const { success, data, dateString } = await scrapEN(io, jobId);
       updateJob(jobId, { jobStatus: 'finished' });
 
@@ -74,6 +69,12 @@ function handleSocketConnections(io) {
       if (appStatus === 'connected') {
         io.to(socket.id).emit('reportGenerated', { success, data, dateString });
       }
+    });
+
+    socket.on('setJobDone', () => {
+      const { jobId, email } = getJob({ socketId: socket.id });
+      updateJob(jobId, { jobStatus: 'accepted', socketId: '' });
+      console.log(`User ${email} accepted the report`);
     });
 
     socket.on('disconnect', () => {
