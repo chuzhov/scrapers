@@ -9,9 +9,10 @@ const {
   getSubcategoryData,
 } = require('./services');
 const { newFilename, sendReportGenMsg } = require('./utils');
-const { getJob } = require('./services/jobFunctions');
+const { getJobs } = require('./services/jobFunctions');
 
 const scrapEN = async (io, jobId) => {
+  const TARGET = 'EN';
   const fetchedData = [];
 
   try {
@@ -31,7 +32,7 @@ const scrapEN = async (io, jobId) => {
       parent: 'last',
     };
 
-    sendReportGenMsg(io, jobId, branch0);
+    sendReportGenMsg(io, jobId, TARGET, branch0);
 
     const subcategories = await getSubcategoryData(category.link);
     for (const subcategory of subcategories) {
@@ -44,7 +45,7 @@ const scrapEN = async (io, jobId) => {
             : 'middle',
         branch0: branch0.type === 'last' ? 'last' : 'middle',
       };
-      sendReportGenMsg(io, jobId, branch1);
+      sendReportGenMsg(io, jobId, TARGET, branch1);
 
       const productLinks = await getAllProductLinks(subcategory.link);
       if (productLinks.length === 0) continue;
@@ -56,7 +57,7 @@ const scrapEN = async (io, jobId) => {
         branch1: branch1.type === 'last' ? 'last' : 'middle',
       };
 
-      sendReportGenMsg(io, jobId, branch2);
+      sendReportGenMsg(io, jobId, TARGET, branch2);
 
       for (let i = 0; i < Math.ceil(productLinks.length / 20); i++) {
         const requests = [];
@@ -79,7 +80,7 @@ const scrapEN = async (io, jobId) => {
         }, []);
 
         if (rejectedIndexes.length > 0) {
-          console.log('Some requests were failed:');
+          console.warn('Some requests were failed:');
           console.log(
             `Total requests: ${requests.length} / failed: ${rejectedIndexes.length}`
           );
@@ -94,15 +95,15 @@ const scrapEN = async (io, jobId) => {
             description: product.productDescription,
           };
           product.properties.forEach((property, index) => {
-            resultObject[`свойство-${index + 1}`] = property.propertyName;
-            resultObject[`значение-${index + 1}`] = property.propertyValue;
+            resultObject[`властивість-${index + 1}`] = property.propertyName;
+            resultObject[`значення-${index + 1}`] = property.propertyValue;
           });
           fetchedData.push(resultObject);
         });
       }
     }
     //  } //001
-    const { email } = getJob({ jobId });
+    const { email } = getJobs({ jobId });
     const { filename, dateString } = newFilename(
       `${email} EN ${jobId}`,
       'json'

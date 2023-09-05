@@ -1,10 +1,12 @@
 const shortid = require('shortid');
 const sessions = require('../db/sessions');
 
-function getJob(prop) {
+function getJobs(prop) {
   const key = Object.keys(prop)[0];
   const val = Object.values(prop)[0];
-  return sessions.find(session => session[key] === val) ?? { jobId: null };
+  // returns an array of sessions
+  //return sessions.find(session => session[key] === val) ?? { jobId: null };
+  return sessions.filter(session => session[key] === val);
 }
 
 function addJob(data) {
@@ -22,4 +24,4 @@ function updateJob(id, data) {
   return sessions;
 }
 
-module.exports = { addJob, getJob, updateJob };
+module.exports = { addJob, getJobs, updateJob };
