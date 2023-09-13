@@ -80,16 +80,21 @@ function handleSocketConnections(io) {
       updateJob(jobId, { jobStatus: 'finished' });
 
       // Send the scrapped data to the frontend
-      const { appStatus } = getJobs({ jobId });
+      const [{ appStatus }] = getJobs({ jobId });
       if (appStatus === 'connected') {
-        io.to(socket.id).emit('reportGenerated', { success, data, dateString });
+        io.to(socket.id).emit('reportGenerated', {
+          target,
+          success,
+          data,
+          dateString,
+        });
       }
     });
 
-    socket.on('setJobDone', () => {
-      const { jobIds, email } = getJobs({ socketId: socket.id });
+    socket.on('setJobDone', target => {
+      const [{ jobIds, email }] = getJobs({ target });
       updateJob(jobIds, { jobStatus: 'accepted', socketId: '' });
-      console.log(`User ${email} accepted the report`);
+      console.log(`User ${email} accepted ${target} report`);
     });
 
     socket.on('disconnect', () => {

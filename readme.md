@@ -1,6 +1,6 @@
 # The back-end part of the Scrapper project:
 
-It scrapes customer-defined data and sends it to the front-end app. Since the
+It scraps customer-defined data and sends it to the front-end app. Since the
 scraping operation could take a significant amount of time, all communications
 between the back-end and front-end run through socket connections.
 
