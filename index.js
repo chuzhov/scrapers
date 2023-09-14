@@ -9,7 +9,7 @@ const {
   getSubcategoryData,
 } = require('./services');
 const { newFilename, sendReportGenMsg } = require('./utils');
-const { getJobs } = require('./services/jobFunctions');
+const { getJobs } = require('./services/DBjobFunctions');
 
 const scrapEN = async (io, jobId) => {
   const TARGET = 'EN';
@@ -32,7 +32,7 @@ const scrapEN = async (io, jobId) => {
       parent: 'last',
     };
 
-    sendReportGenMsg(io, jobId, TARGET, branch0);
+    await sendReportGenMsg(io, jobId, TARGET, branch0);
 
     const subcategories = await getSubcategoryData(category.link);
     for (const subcategory of subcategories) {
@@ -45,7 +45,7 @@ const scrapEN = async (io, jobId) => {
             : 'middle',
         branch0: branch0.type === 'last' ? 'last' : 'middle',
       };
-      sendReportGenMsg(io, jobId, TARGET, branch1);
+      await sendReportGenMsg(io, jobId, TARGET, branch1);
 
       const productLinks = await getAllProductLinks(subcategory.link);
       if (productLinks.length === 0) continue;
@@ -57,7 +57,7 @@ const scrapEN = async (io, jobId) => {
         branch1: branch1.type === 'last' ? 'last' : 'middle',
       };
 
-      sendReportGenMsg(io, jobId, TARGET, branch2);
+      await sendReportGenMsg(io, jobId, TARGET, branch2);
 
       for (let i = 0; i < Math.ceil(productLinks.length / 20); i++) {
         const requests = [];
@@ -103,17 +103,18 @@ const scrapEN = async (io, jobId) => {
       }
     }
     //  } //001
-    const { email } = getJobs({ jobId });
-    const { filename, dateString } = newFilename(
-      `${email} EN ${jobId}`,
-      'json'
-    );
-    const filePath = path.join(__dirname, 'public', filename);
 
-    fs.writeFileSync(filePath, JSON.stringify(fetchedData, null, 2), 'utf-8');
+    // const [{ email }] = await getJobs({ id: jobId });
+    // const { filename, dateString } = newFilename(
+    //   `${email} EN ${jobId}`,
+    //   'json'
+    // );
+    // const filePath = path.join(__dirname, 'public', filename);
 
-    console.log('File saved successfully.');
-    return { success: true, data: fetchedData, dateString };
+    // fs.writeFileSync(filePath, JSON.stringify(fetchedData, null, 2), 'utf-8');
+
+    // console.log('File saved successfully.');
+    return { success: true, data: fetchedData };
   } catch (error) {
     console.log('Ошибка в функции получения данных о продукте');
     console.error(error.message);

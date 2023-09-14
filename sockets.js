@@ -1,71 +1,68 @@
 const fs = require('fs');
 
 const scrapEN = require('.');
-const { addJob, getJobs, updateJob } = require('./services/jobFunctions');
-const { findFileById } = require('./utils');
+const {
+  addJob,
+  getJobs,
+  updateJob,
+  findJobsByCriteria,
+} = require('./services/DBjobFunctions');
+const { toShorterDate } = require('./utils');
 
-function handleSocketConnections(io) {
-  io.on('connection', socket => {
+async function handleSocketConnections(io) {
+  io.on('connection', async socket => {
     const email = socket.handshake.query.email;
-    const jobIds = getJobs({ email }); // an array of jobIds
+    const jobIds = await findJobsByCriteria({ email }, ['accepted']); // an array of jobIds for our user
 
     if (jobIds.length === 0) {
-      console.log(`A user ${email} with id ${socket.id} connected`);
-    } else {
-      jobIds.forEach(jobId =>
-        updateJob(jobId, { socketId: socket.id, appStatus: 'connected' })
+      console.log(
+        `A user ${email} with id ${socket.id} connected. No unfinished jobs found`
       );
-      console.log(`A user ${email} with ${socket.id} connected again`);
-      const jobs = getJobs({ socketId: socket.id });
-
-      jobs.forEach(job => {
-        if (job.jobStatus === 'finished') {
-          // routines for fineshed tasks
-          //recovering screpping results from saved file
-          const { filename, dateString } = findFileById(job.jobId);
-          fs.readFile(filename, 'utf8', (err, data) => {
-            if (err) {
-              console.error(`Error reading file: ${err}`);
-              io.to(socket.id).emit('reportGenerated', {
-                target: job.target,
-                success: false,
-                error: 'File reading error',
-                dateString: '',
-              });
-              return;
-            }
-            // Parse the JSON data
-            try {
-              const parsedData = JSON.parse(data);
-              io.to(socket.id).emit('reportGenerated', {
-                target: job.target,
-                success: true,
-                data: parsedData,
-                dateString,
-              });
-            } catch (jsonError) {
-              // Handle JSON parsing error
-              console.error(`Error parsing JSON: ${jsonError}`);
-              io.to(socket.id).emit('reportGenerated', {
-                target: job.target,
-                success: false,
-                error: 'JSON parsing error',
-                dateString: '',
-              });
-            }
+    } else {
+      //update all unfinished jobs
+      console.log(`A user ${email} with ${socket.id} connected`);
+      jobIds.forEach(async jobId => {
+        //update app status for all unfinished jobs
+        await updateJob(jobId.id, {
+          socketId: socket.id,
+          appStatus: 'connected',
+        });
+        // emit reports for task(s) were finished when the user was disconnected
+        if (jobId.jobStatus === 'finished') {
+          // routines for a
+          //recovering screpping results from DB
+          //const [{ data, dateString }] = await getJobs({ id: jobId.id }); //TODO DEBUG RESULT
+          io.to(socket.id).emit('reportGenerated', {
+            jobId: jobId.id,
+            target: jobId.target,
+            success: true,
+            data: jobId.data,
+            dateString: toShorterDate(jobId.reportCreatedAt),
           });
         }
-        if (job.jobStatus !== 'finished') {
+        if (jobId.jobStatus === 'scrapping') {
           io.to(socket.id).emit('status', {
-            target: job.target,
-            status: job.jobStatus,
+            target: jobId.target,
+            jobStatus: jobId.jobStatus,
           });
         }
       });
+
+      //   const jobs = await getJobs({ socketId: socket.id });
+
+      //    jobs.forEach(async job => {
+
+      // if (job.jobStatus !== 'finished') {
+      //   io.to(socket.id).emit('status', {
+      //     target: job.target,
+      //     status: job.jobStatus,
+      //   });
+      // }
+      //     });
     }
 
     socket.on('generateReport', async ({ target }) => {
-      const jobId = addJob({
+      const jobId = await addJob({
         target,
         email: socket.handshake.query.email,
         socketId: socket.id,
@@ -76,30 +73,50 @@ function handleSocketConnections(io) {
         `Received generation request from ${email} for target ${target}`
       );
 
-      const { success, data, dateString } = await scrapEN(io, jobId);
-      updateJob(jobId, { jobStatus: 'finished' });
+      //TODO WHAT ABOUT ANOTHER TARGETS?
+      const { success, data } = await scrapEN(io, jobId);
+      const job = await updateJob(jobId, {
+        jobStatus: 'finished',
+        data,
+        reportCreatedAt: Date.now(),
+      });
 
       // Send the scrapped data to the frontend
-      const [{ appStatus }] = getJobs({ jobId });
-      if (appStatus === 'connected') {
+      //  const [{ appStatus }] = await getJobs({ id: jobId });
+      if (job.appStatus === 'connected') {
         io.to(socket.id).emit('reportGenerated', {
-          target,
+          jobId: job.id,
+          target: job.target,
           success,
-          data,
-          dateString,
+          data: job.data,
+          dateString: toShorterDate(job.reportCreatedAt),
         });
       }
     });
 
-    socket.on('setJobDone', target => {
-      const [{ jobIds, email }] = getJobs({ target });
-      updateJob(jobIds, { jobStatus: 'accepted', socketId: '' });
-      console.log(`User ${email} accepted ${target} report`);
+    socket.on('setJobDone', async jobId => {
+      //const [{ jobIds }] = await getJobs({ email, target });
+      const result = await updateJob(jobId, {
+        jobStatus: 'accepted',
+        appStatus: '',
+        socketId: '',
+      });
+      console.log(
+        `User ${result.email} accepted ${result.target} report for job ${result.id}`
+      );
     });
 
-    socket.on('disconnect', () => {
-      const { jobIds, email } = getJobs({ socketId: socket.id });
-      updateJob(jobIds, { appStatus: 'disconnected', socketId: '' });
+    socket.on('disconnect', async () => {
+      const jobIds = await getJobs({ socketId: socket.id });
+      if (jobIds.length > 0) {
+        jobIds.forEach(
+          async jobId =>
+            await updateJob(jobId.id, {
+              appStatus: 'disconnected',
+              socketId: '',
+            })
+        );
+      }
       console.log(`User ${email} disconnected`);
     });
   });

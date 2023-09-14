@@ -1,7 +1,7 @@
-const { getJobs } = require('../services/jobFunctions');
+const { getJobs } = require('../services/DBjobFunctions');
 
-function sendReportGenMsg(io, jobId, target, msg) {
-  const [job] = getJobs({ jobId });
+async function sendReportGenMsg(io, jobId, target, msg) {
+  const [job] = await getJobs({ id: jobId });
   const { socketId, appStatus } = job;
   if (appStatus === 'connected') {
     io.to(socketId).emit('reportGenStatus', { target, msg });
