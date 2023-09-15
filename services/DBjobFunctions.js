@@ -12,13 +12,15 @@ async function getJobs(prop, options) {
   }
 }
 
-async function findJobsByCriteria(options) {
+async function findJobsByCriteria(options = {}) {
   try {
     const {
       criteria,
       column = 'jobStatus',
       toExclude = [],
       toInclude = [],
+      orderColumn = 'createdAt',
+      sortOrder = 'ASC',
     } = options;
     const whereClause = { ...criteria };
 
@@ -36,10 +38,17 @@ async function findJobsByCriteria(options) {
     }
 
     await Job.sync();
-    const jobs = await Job.findAll({
+    const queryOptions = {
       where: whereClause,
       cache: false, // Disable caching for this query
-    });
+    };
+
+    // Check if orderColumn is provided, if so, add ordering to the query
+    if (orderColumn) {
+      queryOptions.order = [[orderColumn, sortOrder]];
+    }
+
+    const jobs = await Job.findAll(queryOptions);
     console.log(jobs);
     return jobs;
   } catch (error) {
@@ -77,13 +86,15 @@ async function updateJob(id, data) {
     }
     return null;
   }
-
-  //   for (let i = 0; i < sessions.length; i++) {
-  //     if (sessions[i].jobId === id) {
-  //       sessions[i] = { ...sessions[i], ...data };
-  //     }
-  //   }
-  //   return sessions;
 }
 
-module.exports = { addJob, getJobs, updateJob, findJobsByCriteria };
+async function deleteJob(id) {
+  try {
+    await Job.destroy({ where: { id } });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { addJob, getJobs, updateJob, findJobsByCriteria, deleteJob };

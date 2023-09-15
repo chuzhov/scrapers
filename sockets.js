@@ -8,6 +8,7 @@ const {
   findJobsByCriteria,
 } = require('./services/DBjobFunctions');
 const { toShorterDate } = require('./utils');
+const { clearUnnecessaryAcceptedJobs } = require('./services/DBroutines');
 
 async function handleSocketConnections(io) {
   io.on('connection', async socket => {
@@ -89,13 +90,17 @@ async function handleSocketConnections(io) {
 
     socket.on('setJobDone', async jobId => {
       //const [{ jobIds }] = await getJobs({ email, target });
-      const result = await updateJob(jobId, {
+      const job = await updateJob(jobId, {
         jobStatus: 'accepted',
         appStatus: '',
         socketId: '',
       });
+      clearUnnecessaryAcceptedJobs(
+        { email: job.email },
+        { target: job.target }
+      );
       console.log(
-        `User ${result.email} accepted ${result.target} report for job ${result.id}`
+        `User ${job.email} accepted ${job.target} report for job ${job.id}`
       );
     });
 
