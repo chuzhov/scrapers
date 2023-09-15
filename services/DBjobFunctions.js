@@ -12,23 +12,38 @@ async function getJobs(prop, options) {
   }
 }
 
-async function findJobsByCriteria(criteria, statusesToExclude = []) {
+async function findJobsByCriteria(options) {
   try {
+    const {
+      criteria,
+      column = 'jobStatus',
+      toExclude = [],
+      toInclude = [],
+    } = options;
     const whereClause = { ...criteria };
 
-    if (statusesToExclude.length > 0) {
-      whereClause.jobStatus = {
-        [Op.notIn]: statusesToExclude,
+    if (toExclude.length > 0) {
+      whereClause[column] = {
+        [Op.notIn]: toExclude,
+      };
+    }
+    if (toInclude.length > 0) {
+      // Merge the existing criteria with the inclusion criteria
+      whereClause[column] = {
+        ...whereClause[column],
+        [Op.in]: toInclude,
       };
     }
 
+    await Job.sync();
     const jobs = await Job.findAll({
       where: whereClause,
+      cache: false, // Disable caching for this query
     });
-
+    console.log(jobs);
     return jobs;
   } catch (error) {
-    console.error('Error fetching jobs with exclusion:', error);
+    console.error('Error fetching jobs with exclusion:', error.message);
     throw error;
   }
 }
@@ -37,7 +52,7 @@ async function addJob(data) {
   try {
     //  await Job.sync();
     const { id } = await Job.create(data);
-    console.log(id);
+
     return id;
   } catch (error) {
     return null;
