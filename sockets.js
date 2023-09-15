@@ -12,37 +12,44 @@ const { toShorterDate } = require('./utils');
 async function handleSocketConnections(io) {
   io.on('connection', async socket => {
     const email = socket.handshake.query.email;
-    const jobIds = await findJobsByCriteria({ email }, ['accepted']); // an array of jobIds for our user
+    const jobs = await findJobsByCriteria({
+      criteria: { email },
+      column: 'jobStatus',
+      toExclude: ['accepted'],
+      toInclude: [],
+    });
 
-    if (jobIds.length === 0) {
+    if (jobs.length === 0) {
       console.log(
         `A user ${email} with id ${socket.id} connected. No unfinished jobs found`
       );
     } else {
       //update all unfinished jobs
-      console.log(`A user ${email} with ${socket.id} connected`);
-      jobIds.forEach(async jobId => {
+      console.log(
+        `A user ${email} with ${socket.id} connected with ${jobs.length} unfinished jobs`
+      );
+      jobs.forEach(async job => {
         //update app status for all unfinished jobs
-        await updateJob(jobId.id, {
+        await updateJob(job.id, {
           socketId: socket.id,
           appStatus: 'connected',
         });
         // emit reports for task(s) were finished when the user was disconnected
-        if (jobId.jobStatus === 'finished') {
+        if (job.jobStatus === 'finished') {
           // Send the scrapped data to the frontend
           // recovering screpping results from DB
           io.to(socket.id).emit('reportGenerated', {
-            jobId: jobId.id,
-            target: jobId.target,
+            jobId: job.id,
+            target: job.target,
             success: true,
-            data: jobId.data,
-            dateString: toShorterDate(jobId.reportCreatedAt),
+            data: job.data,
+            dateString: toShorterDate(job.reportCreatedAt),
           });
         }
-        if (jobId.jobStatus === 'scrapping') {
+        if (job.jobStatus === 'scrapping') {
           io.to(socket.id).emit('status', {
-            target: jobId.target,
-            jobStatus: jobId.jobStatus,
+            target: job.target,
+            jobStatus: job.jobStatus,
           });
         }
       });
@@ -93,11 +100,11 @@ async function handleSocketConnections(io) {
     });
 
     socket.on('disconnect', async () => {
-      const jobIds = await getJobs({ socketId: socket.id });
-      if (jobIds.length > 0) {
-        jobIds.forEach(
-          async jobId =>
-            await updateJob(jobId.id, {
+      const jobs = await getJobs({ socketId: socket.id });
+      if (jobs.length > 0) {
+        jobs.forEach(
+          async job =>
+            await updateJob(job.id, {
               appStatus: 'disconnected',
               socketId: '',
             })
