@@ -29,9 +29,8 @@ async function handleSocketConnections(io) {
         });
         // emit reports for task(s) were finished when the user was disconnected
         if (jobId.jobStatus === 'finished') {
-          // routines for a
-          //recovering screpping results from DB
-          //const [{ data, dateString }] = await getJobs({ id: jobId.id }); //TODO DEBUG RESULT
+          // Send the scrapped data to the frontend
+          // recovering screpping results from DB
           io.to(socket.id).emit('reportGenerated', {
             jobId: jobId.id,
             target: jobId.target,
@@ -47,18 +46,6 @@ async function handleSocketConnections(io) {
           });
         }
       });
-
-      //   const jobs = await getJobs({ socketId: socket.id });
-
-      //    jobs.forEach(async job => {
-
-      // if (job.jobStatus !== 'finished') {
-      //   io.to(socket.id).emit('status', {
-      //     target: job.target,
-      //     status: job.jobStatus,
-      //   });
-      // }
-      //     });
     }
 
     socket.on('generateReport', async ({ target }) => {
@@ -82,7 +69,6 @@ async function handleSocketConnections(io) {
       });
 
       // Send the scrapped data to the frontend
-      //  const [{ appStatus }] = await getJobs({ id: jobId });
       if (job.appStatus === 'connected') {
         io.to(socket.id).emit('reportGenerated', {
           jobId: job.id,
