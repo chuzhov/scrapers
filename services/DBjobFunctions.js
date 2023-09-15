@@ -49,7 +49,7 @@ async function findJobsByCriteria(options = {}) {
     }
 
     const jobs = await Job.findAll(queryOptions);
-    console.log(jobs);
+
     return jobs;
   } catch (error) {
     console.error('Error fetching jobs with exclusion:', error.message);
