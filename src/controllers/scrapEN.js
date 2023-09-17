@@ -1,15 +1,11 @@
-const json2xls = require('json2xls');
-const fs = require('fs');
-const path = require('path');
-
 const {
   getCategoryData,
   getAllProductLinks,
   getProductData,
   getSubcategoryData,
-} = require('./services');
-const { newFilename, sendReportGenMsg } = require('./utils');
-const { getJobs } = require('./services/DBjobFunctions');
+} = require('../services');
+const { newFilename, sendReportGenMsg } = require('../utils');
+const { getJobs } = require('../services/DBjobFunctions');
 
 const scrapEN = async (io, jobId) => {
   const TARGET = 'EN';

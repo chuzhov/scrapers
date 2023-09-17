@@ -23,6 +23,7 @@ testDBConnection()
   })
   .then(() => {
     console.log(`Server is running on port ${PORT}`);
+    //TODO: add check if are 'scrapping' records and delete them
   })
   .catch(() => {
     console.error('Could not connect to DB');

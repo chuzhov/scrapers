@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const scrapEN = require('.');
+const ctrl = require('./controllers/');
 const {
   addJob,
   getJobs,
@@ -69,7 +69,7 @@ async function handleSocketConnections(io) {
       );
 
       //TODO WHAT ABOUT ANOTHER TARGETS?
-      const { success, data } = await scrapEN(io, jobId);
+      const { success, data } = await ctrl.scrapEN(io, jobId);
       const job = await updateJob(jobId, {
         jobStatus: 'finished',
         data,

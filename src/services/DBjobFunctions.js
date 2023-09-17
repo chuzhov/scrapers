@@ -1,5 +1,3 @@
-const sessions = require('../db/sessions');
-
 const Job = require('../models/jobs.model');
 const { Op } = require('sequelize');
 
