@@ -15,7 +15,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 });
 
 // Test connection
-async function testConnection() {
+async function testDBConnection() {
   try {
     await sequelize.authenticate();
     console.log(
@@ -31,5 +31,5 @@ async function testConnection() {
 
 module.exports = {
   sequelize, // Export the Sequelize instance
-  testConnection, // Export the testConnection function
+  testDBConnection, // Export the testConnection function
 };

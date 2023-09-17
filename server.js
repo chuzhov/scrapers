@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const app = require('./app');
 const handleSocketConnections = require('./sockets');
-const { testConnection } = require('./db/sequelize');
+const { testDBConnection } = require('./db/sequelize');
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -16,13 +16,13 @@ const io = socketIo(server, {
 
 const { PORT = 4000 } = process.env;
 
-testConnection()
+testDBConnection()
   .then(() => {
-    // Handle socket connections
     handleSocketConnections(io);
-    server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+    return server.listen(PORT);
+  })
+  .then(() => {
+    console.log(`Server is running on port ${PORT}`);
   })
   .catch(() => {
     console.error('Could not connect to DB');
