@@ -16,11 +16,14 @@ const io = socketIo(server, {
 
 const { PORT = 4000 } = process.env;
 
-// Handle socket connections
-handleSocketConnections(io);
-
-testConnection();
-
-server.listen(PORT, () => {
-  console.log('Server is running on port 4000');
-});
+testConnection()
+  .then(() => {
+    // Handle socket connections
+    handleSocketConnections(io);
+    server.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(() => {
+    console.error('Could not connect to DB');
+  });
