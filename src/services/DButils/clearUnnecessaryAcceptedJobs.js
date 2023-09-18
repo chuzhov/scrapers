@@ -1,6 +1,6 @@
-const Job = require('../models/jobs.model');
-const { NUMBER_OF_JOBS_TO_KEEP } = require('../config/db.config');
-const { deleteJob, findJobsByCriteria } = require('./DBjobFunctions');
+const Job = require('../../models/jobs.model');
+const { NUMBER_OF_JOBS_TO_KEEP } = require('../../config/db.config');
+const { deleteJob, findJobsByCriteria } = require('../DBjobFunctions');
 
 async function clearUnnecessaryAcceptedJobs(email, target) {
   try {
@@ -39,6 +39,4 @@ async function clearUnnecessaryAcceptedJobs(email, target) {
   }
 }
 
-module.exports = {
-  clearUnnecessaryAcceptedJobs,
-};
+module.exports = clearUnnecessaryAcceptedJobs;
