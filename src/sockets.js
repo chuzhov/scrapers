@@ -8,9 +8,13 @@ const {
   findJobsByCriteria,
 } = require('./services/DBjobFunctions');
 const { toShorterDate } = require('./utils');
-const { clearUnnecessaryAcceptedJobs } = require('./services/DBroutines');
+const {
+  clearUnnecessaryAcceptedJobs,
+  clearCrushedJobs,
+} = require('./services/DButils/');
 
 async function handleSocketConnections(io) {
+  await clearCrushedJobs();
   io.on('connection', async socket => {
     const email = socket.handshake.query.email;
     const jobs = await findJobsByCriteria({
