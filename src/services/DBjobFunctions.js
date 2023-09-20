@@ -19,6 +19,8 @@ async function findJobsByCriteria(options = {}) {
       toInclude = [],
       orderColumn = 'createdAt',
       sortOrder = 'ASC',
+      limit, // Added limit option
+      returnColumns = [], // Renamed columns to returnColumns
     } = options;
     const whereClause = { ...criteria };
 
@@ -30,8 +32,8 @@ async function findJobsByCriteria(options = {}) {
     if (toInclude.length > 0) {
       // Merge the existing criteria with the inclusion criteria
       whereClause[column] = {
-        ...whereClause[column],
-        [Op.in]: toInclude,
+        ...whereClause[column], // Preserve the existing criteria
+        [Op.in]: toInclude, // Add the inclusion criteria
       };
     }
 
@@ -44,6 +46,16 @@ async function findJobsByCriteria(options = {}) {
     // Check if orderColumn is provided, if so, add ordering to the query
     if (orderColumn) {
       queryOptions.order = [[orderColumn, sortOrder]];
+    }
+
+    // Check if limit is provided, if so, add it to the query
+    if (limit) {
+      queryOptions.limit = limit;
+    }
+
+    // Check if returnColumns are provided, if so, include them in the query
+    if (returnColumns.length > 0) {
+      queryOptions.attributes = returnColumns;
     }
 
     const jobs = await Job.findAll(queryOptions);

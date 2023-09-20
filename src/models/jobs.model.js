@@ -5,10 +5,6 @@ const { sequelize } = require('../db/sequelize');
 
 // Define model
 const Job = sequelize.define('Job', {
-  // jobId: {
-  //   type: DataTypes.STRING,
-  //   primaryKey: true,
-  // },
   target: DataTypes.STRING,
   email: DataTypes.STRING,
   socketId: DataTypes.STRING,

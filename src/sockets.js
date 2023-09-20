@@ -1,4 +1,4 @@
-const fs = require('fs');
+const logger = require('./config/logger.config');
 
 const ctrl = require('./controllers/');
 const {
@@ -11,12 +11,19 @@ const { toShorterDate } = require('./utils');
 const {
   clearUnnecessaryAcceptedJobs,
   clearCrushedJobs,
+  getLatestJobs,
 } = require('./services/DButils/');
 
 async function handleSocketConnections(io) {
   await clearCrushedJobs();
   io.on('connection', async socket => {
     const email = socket.handshake.query.email;
+    const targetsString = socket.handshake.query.targets;
+
+    const targets = JSON.parse(targetsString);
+    const previousJobs = await getLatestJobs(email, targets);
+    io.to(socket.id).emit('previousJobs', previousJobs);
+
     const jobs = await findJobsByCriteria({
       criteria: { email },
       column: 'jobStatus',
@@ -25,12 +32,12 @@ async function handleSocketConnections(io) {
     });
 
     if (jobs.length === 0) {
-      console.log(
+      logger.info(
         `A user ${email} with id ${socket.id} connected. No unfinished jobs found`
       );
     } else {
       //update all unfinished jobs
-      console.log(
+      logger.info(
         `A user ${email} with ${socket.id} connected with ${jobs.length} unfinished jobs`
       );
       jobs.forEach(async job => {
@@ -68,7 +75,7 @@ async function handleSocketConnections(io) {
         jobStatus: 'scrapping', // error, scrapping, finished, accepted
         appStatus: 'connected', //connected, disconnected
       });
-      console.log(
+      logger.info(
         `Received generation request from ${email} for target ${target}`
       );
 
@@ -103,7 +110,7 @@ async function handleSocketConnections(io) {
         { email: job.email },
         { target: job.target }
       );
-      console.log(
+      logger.info(
         `User ${job.email} accepted ${job.target} report for job ${job.id}`
       );
     });
@@ -119,7 +126,7 @@ async function handleSocketConnections(io) {
             })
         );
       }
-      console.log(`User ${email} disconnected`);
+      logger.info(`User ${email} disconnected`);
     });
   });
 }
