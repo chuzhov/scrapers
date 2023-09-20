@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 // Create connection
 const { sequelize } = require('../db/sequelize');
+const logger = require('../config/logger.config');
 
 // Define model
 const Job = sequelize.define('Job', {
@@ -33,9 +34,9 @@ const Job = sequelize.define('Job', {
 (async () => {
   try {
     await Job.sync(); // Your Sequelize synchronization code here
-    console.log('Database synchronized successfully');
+    logger.info('Database synchronized successfully');
   } catch (error) {
-    console.error('Error synchronizing database:', error);
+    logger.error('Error synchronizing database:', error);
   }
 })();
 // Save to DB

@@ -1,5 +1,6 @@
 const http = require('http');
 const socketIo = require('socket.io');
+const logger = require('./config/logger.config');
 require('dotenv').config();
 
 const app = require('./app');
@@ -22,9 +23,9 @@ testDBConnection()
     return server.listen(PORT);
   })
   .then(() => {
-    console.log(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
     //TODO: add check if are 'scrapping' records and delete them
   })
-  .catch(() => {
-    console.error('Could not connect to DB');
+  .catch(error => {
+    logger.error(error);
   });

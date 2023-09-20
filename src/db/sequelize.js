@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const logger = require('../config/logger.config');
 
 const { DB_NAME, DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
@@ -18,13 +19,10 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 async function testDBConnection() {
   try {
     await sequelize.authenticate();
-    console.log(
-      '%cConnection has been established successfully.',
-      'color: rgb(53,101,137)'
-    );
+    logger.info('Connection has been established successfully.');
     return true;
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    logger.error('Unable to connect to the database:', error);
     return false;
   }
 }

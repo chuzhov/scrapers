@@ -1,6 +1,7 @@
 const Job = require('../../models/jobs.model');
 const { NUMBER_OF_JOBS_TO_DISPLAY } = require('../../config/front.config');
 const { findJobsByCriteria } = require('../DBjobFunctions');
+const logger = require('../../config/logger.config');
 
 async function getLatestJobs(email, targets) {
   try {
@@ -23,8 +24,8 @@ async function getLatestJobs(email, targets) {
     return jobs; // Array of arrays: [[target], [jobs]]
   } catch (error) {
     // Handle errors that may occur during Promise.all
-    console.error('Error:', error?.message || error);
-    throw error;
+    logger.error('Error:', error?.message || error);
+    return [];
   }
 }
 

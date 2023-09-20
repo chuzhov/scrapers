@@ -1,3 +1,4 @@
+const logger = require('../config/logger.config');
 const Job = require('../models/jobs.model');
 const { Op } = require('sequelize');
 
@@ -6,7 +7,7 @@ async function getJobs(prop, options) {
     const result = await Job.findAll({ where: prop, options });
     return result;
   } catch (error) {
-    console.log(error);
+    logger.error(error);
   }
 }
 
@@ -62,7 +63,7 @@ async function findJobsByCriteria(options = {}) {
 
     return jobs;
   } catch (error) {
-    console.error('Error fetching jobs with exclusion:', error.message);
+    logger.error('Error fetching jobs with exclusion:', error.message || error);
     throw error;
   }
 }
@@ -90,9 +91,9 @@ async function updateJob(id, data) {
     return dataValues;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`Error updating job: ${id}: `, error.message);
+      logger.error(`Error updating job: ${id}: `, error.message);
     } else {
-      console.error(`Error updating job: ${id}: `, error);
+      logger.error(`Error updating job: ${id}: `, error);
     }
     return null;
   }

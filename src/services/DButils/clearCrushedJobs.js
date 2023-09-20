@@ -1,3 +1,4 @@
+const logger = require('../../config/logger.config');
 const { deleteJob, findJobsByCriteria } = require('../DBjobFunctions');
 
 async function clearCrushedJobs(email, target) {
@@ -13,7 +14,7 @@ async function clearCrushedJobs(email, target) {
     });
 
     if (jobs.length === 0) {
-      console.log('No crushed jobs found in DB');
+      logger.info('No crushed jobs found in DB');
       return;
     }
 
@@ -23,9 +24,9 @@ async function clearCrushedJobs(email, target) {
       await deleteJob(id);
     });
 
-    console.log('IDs to delete:', idsToDelete);
+    logger.info('IDs to delete:', idsToDelete);
   } catch (error) {
-    console.error('Error clearing crushed jobs: ', error?.message || error);
+    logger.error('Error clearing crushed jobs: ', error?.message || error);
     throw error;
   }
 }
