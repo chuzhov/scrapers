@@ -11,6 +11,6 @@ The front-end app saves scraped data to an XLSX file locally on the user's disk.
 
 Upcoming changes:
 
-1. [ ] Useing TypeScript;
-2. [x] Useing some DB to store data;
-3. [ ]Comparing scrapped data versions to highlight changes;
+1. [ ] Using TypeScript;
+2. [x] Using some DB to store data;
+3. [ ] Comparing scrapped data versions to highlight changes;
