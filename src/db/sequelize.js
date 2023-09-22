@@ -22,10 +22,11 @@ async function testDBConnection() {
     logger.info('Connection to DB has been established successfully.');
     return true;
   } catch (error) {
+    console.log(DB_HOST);
     logger.error(
       `[sequelize.js] Unable to connect to the DB , ${error?.message || error}`
     );
-    return false;
+    throw error;
   }
 }
 
