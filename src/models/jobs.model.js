@@ -36,13 +36,10 @@ const Job = sequelize.define('Job', {
     await Job.sync(); // Your Sequelize synchronization code here
     logger.info('Database synchronized successfully');
   } catch (error) {
-    logger.error('Error synchronizing database:', error);
+    logger.error(
+      `[job.model.js] Error synchronizing database: ${error?.message || error}`
+    );
   }
 })();
-// Save to DB
-//await Job.create(data);
-
-// Get from DB
-//const job = await Job.findByPk(data.jobId);
 
 module.exports = Job;

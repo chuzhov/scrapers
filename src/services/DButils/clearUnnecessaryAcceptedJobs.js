@@ -1,6 +1,7 @@
 const Job = require('../../models/jobs.model');
 const { NUMBER_OF_JOBS_TO_KEEP } = require('../../config/db.config');
 const { deleteJob, findJobsByCriteria } = require('../DBjobFunctions');
+const logger = require('../../config/logger.config');
 
 async function clearUnnecessaryAcceptedJobs(email, target) {
   try {
@@ -32,9 +33,11 @@ async function clearUnnecessaryAcceptedJobs(email, target) {
       await deleteJob(id);
     });
 
-    console.log('IDs to delete:', idsToDelete);
+    logger.info(`IDs to delete:, ${idsToDelete}`);
   } catch (error) {
-    console.error('Error:', error?.message || error);
+    logger.error(
+      `<clearUnnecessaryAcceptedJobs> Error:', ${error?.message || error}`
+    );
     throw error;
   }
 }

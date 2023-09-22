@@ -7,7 +7,7 @@ async function getJobs(prop, options) {
     const result = await Job.findAll({ where: prop, options });
     return result;
   } catch (error) {
-    logger.error(error);
+    logger.error(`<getJobs> Error fetching jobs: ${error.message || error}`);
   }
 }
 
@@ -63,7 +63,9 @@ async function findJobsByCriteria(options = {}) {
 
     return jobs;
   } catch (error) {
-    logger.error('Error fetching jobs with exclusion:', error.message || error);
+    logger.error(
+      `<findJobsByCriteria> Error fetching jobs: ${error.message || error}`
+    );
     throw error;
   }
 }
@@ -90,11 +92,7 @@ async function updateJob(id, data) {
     [_, { dataValues }] = result;
     return dataValues;
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error(`Error updating job: ${id}: `, error.message);
-    } else {
-      logger.error(`Error updating job: ${id}: `, error);
-    }
+    logger.error(`<updateJob> Error fetching jobs: ${error.message || error}`);
     return null;
   }
 }
@@ -104,7 +102,8 @@ async function deleteJob(id) {
     await Job.destroy({ where: { id } });
     return true;
   } catch (error) {
-    throw error;
+    logger.error(`<deleteJob> Error fetching jobs: ${error.message || error}`);
+    return null;
   }
 }
 

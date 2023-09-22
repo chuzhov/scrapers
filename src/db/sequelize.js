@@ -19,10 +19,12 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 async function testDBConnection() {
   try {
     await sequelize.authenticate();
-    logger.info('Connection has been established successfully.');
+    logger.info('Connection to DB has been established successfully.');
     return true;
   } catch (error) {
-    logger.error('Unable to connect to the database:', error);
+    logger.error(
+      `[sequelize.js] Unable to connect to the DB , ${error?.message || error}`
+    );
     return false;
   }
 }

@@ -24,9 +24,13 @@ async function clearCrushedJobs(email, target) {
       await deleteJob(id);
     });
 
-    logger.info('IDs to delete:', idsToDelete);
+    logger.info(`IDs to delete: ${idsToDelete}`);
   } catch (error) {
-    logger.error('Error clearing crushed jobs: ', error?.message || error);
+    logger.error(
+      `[clearCrushedJobs] Error clearing crushed jobs: ${
+        error?.message || error
+      }`
+    );
     throw error;
   }
 }

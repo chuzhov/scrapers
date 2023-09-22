@@ -24,7 +24,9 @@ async function getLatestJobs(email, targets) {
     return jobs; // Array of arrays: [[target], [jobs]]
   } catch (error) {
     // Handle errors that may occur during Promise.all
-    logger.error('Error:', error?.message || error);
+    logger.error(
+      `[getLatestJobs] Error fetching jobs, ${error?.message || error}`
+    );
     return [];
   }
 }

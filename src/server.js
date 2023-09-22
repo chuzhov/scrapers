@@ -27,5 +27,5 @@ testDBConnection()
     //TODO: add check if are 'scrapping' records and delete them
   })
   .catch(error => {
-    logger.error(error);
+    logger.error(`Error in [server.js]: ${error?.message || error}`);
   });

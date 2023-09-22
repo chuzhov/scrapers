@@ -80,7 +80,20 @@ async function handleSocketConnections(io) {
       );
 
       //TODO WHAT ABOUT ANOTHER TARGETS?
-      const { success, data } = await ctrl.scrapEN(io, jobId);
+      console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+      let scrData = [];
+      if (process.env.NODE_ENV === 'production') {
+        scrData = await ctrl.scrapEN(io, jobId);
+      } else {
+        scrData = await ctrl.scrapEN_DEV(io, jobId);
+      }
+      const { success, data } = scrData;
+
+      // const { success, data } =
+      //   process.env.NODE_ENV === 'production'
+      //     ? await ctrl.scrapEN(io, jobId)
+      //     : await ctrl.scrapEN_DEV(io, jobId);
+      //const { success, data } = await ctrl.scrapEN(io, jobId);
       const job = await updateJob(jobId, {
         jobStatus: 'finished',
         data,
