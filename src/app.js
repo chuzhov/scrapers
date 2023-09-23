@@ -10,4 +10,9 @@ app.use((req, res, next) => {
 // Serve the frontend files (adjust the path accordingly)
 app.use(express.static('public'));
 
+app.get('/', (req, res) => {
+  // Read the contents of the HTML file and send it as the response.
+  res.sendFile('../public/index.html');
+});
+
 module.exports = app;
