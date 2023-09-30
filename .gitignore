@@ -73,6 +73,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.railway
 .env.test
 .env.backup
 

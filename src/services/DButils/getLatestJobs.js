@@ -13,7 +13,7 @@ async function getLatestJobs(email, targets) {
         orderColumn: 'reportCreatedAt',
         sortOrder: 'DESC',
         limit: NUMBER_OF_JOBS_TO_DISPLAY,
-        returnColumns: ['target', 'reportCreatedAt', 'data'],
+        returnColumns: ['target', 'reportCreatedAt', 'scrapingTime', 'data'],
       });
 
       return [...resultArray.map(job => job.dataValues)];

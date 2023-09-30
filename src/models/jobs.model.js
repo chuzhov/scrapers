@@ -12,6 +12,7 @@ const Job = sequelize.define('Job', {
   jobStatus: DataTypes.STRING, // error, scrapping, finished, accepted
   appStatus: DataTypes.STRING, //connected, disconnected
   reportCreatedAt: DataTypes.DATE,
+  scrapingTime: DataTypes.INTEGER,
   data: DataTypes.JSONB,
   dataLength: {
     type: DataTypes.VIRTUAL,

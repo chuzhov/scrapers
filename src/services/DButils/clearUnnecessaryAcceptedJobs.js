@@ -33,7 +33,7 @@ async function clearUnnecessaryAcceptedJobs(email, target) {
       await deleteJob(id);
     });
 
-    logger.info(`IDs to delete:, ${idsToDelete}`);
+    logger.info(`IDs to delete: [${idsToDelete}]`);
   } catch (error) {
     logger.error(
       `<clearUnnecessaryAcceptedJobs> Error:', ${error?.message || error}`

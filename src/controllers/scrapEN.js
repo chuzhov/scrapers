@@ -16,8 +16,6 @@ const scrapEN = async (io, jobId) => {
     const categoryData = await getCategoryData('/uk/');
 
     for (const category of categoryData) {
-      //001
-
       console.log(`Category: ${category.name}`);
 
       const branch0 = {
@@ -77,8 +75,8 @@ const scrapEN = async (io, jobId) => {
           }, []);
 
           if (rejectedIndexes.length > 0) {
-            console.warn('Some requests were failed:');
-            console.log(
+            logger.warn('Some requests were failed:');
+            logger.warn(
               `Total requests: ${requests.length} / failed: ${rejectedIndexes.length}`
             );
           }
@@ -100,8 +98,6 @@ const scrapEN = async (io, jobId) => {
         }
       }
     } //001
-
-    logger.info(`🎯 Scraped successfully. Data length: ${fetchedData.length}`);
     return { success: true, data: fetchedData };
   } catch (error) {
     logger.error(

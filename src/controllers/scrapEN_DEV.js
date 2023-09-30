@@ -111,7 +111,6 @@ const scrapEN_DEV = async (io, jobId) => {
     // fs.writeFileSync(filePath, JSON.stringify(fetchedData, null, 2), 'utf-8');
 
     // console.log('File saved successfully.');
-    logger.info(`🎯 Scraped successfully. Data length: ${fetchedData.length}`);
     return { success: true, data: fetchedData };
   } catch (error) {
     logger.error(

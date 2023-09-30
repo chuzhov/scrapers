@@ -1,4 +1,5 @@
 const logger = require('./config/logger.config');
+const { performance } = require('perf_hooks');
 
 const ctrl = require('./controllers/');
 const {
@@ -7,7 +8,7 @@ const {
   updateJob,
   findJobsByCriteria,
 } = require('./services/DBjobFunctions');
-const { toShorterDate } = require('./utils');
+const { toShorterDate, convertMsToTime } = require('./utils');
 const {
   clearUnnecessaryAcceptedJobs,
   clearCrushedJobs,
@@ -56,6 +57,7 @@ async function handleSocketConnections(io) {
             success: true,
             data: job.data,
             dateString: toShorterDate(job.reportCreatedAt),
+            scrapingTime: job.scrapingTime,
           });
         }
         if (job.jobStatus === 'scrapping') {
@@ -80,24 +82,31 @@ async function handleSocketConnections(io) {
       );
 
       //TODO WHAT ABOUT ANOTHER TARGETS?
-      console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+      const startTime = performance.now();
+      logger.info('Environment: ', process.env.NODE_ENV);
       let scrData = [];
       if (process.env.NODE_ENV === 'production') {
         scrData = await ctrl.scrapEN(io, jobId);
       } else {
         scrData = await ctrl.scrapEN_DEV(io, jobId);
       }
-      const { success, data } = scrData;
+      const endTime = performance.now();
+      const rawExecutionTime = Math.trunc(endTime - startTime);
+      const { days, hours, minutes, seconds } =
+        convertMsToTime(rawExecutionTime);
 
-      // const { success, data } =
-      //   process.env.NODE_ENV === 'production'
-      //     ? await ctrl.scrapEN(io, jobId)
-      //     : await ctrl.scrapEN_DEV(io, jobId);
-      //const { success, data } = await ctrl.scrapEN(io, jobId);
+      const { success, data } = scrData;
+      logger.info(
+        `🎯 Scraped successfully. Data length: ${data.length}. ⏱ ${
+          days !== '00' ? days + 'd' : ''
+        } ${hours !== '00' ? hours + 'h' : ''} ${minutes}m ${seconds}s`
+      );
+
       const job = await updateJob(jobId, {
         jobStatus: 'finished',
         data,
         reportCreatedAt: Date.now(),
+        scrapingTime: rawExecutionTime,
       });
 
       // Send the scrapped data to the frontend
@@ -108,12 +117,12 @@ async function handleSocketConnections(io) {
           success,
           data: job.data,
           dateString: toShorterDate(job.reportCreatedAt),
+          scrapingTime: rawExecutionTime,
         });
       }
     });
 
     socket.on('setJobDone', async jobId => {
-      //const [{ jobIds }] = await getJobs({ email, target });
       const job = await updateJob(jobId, {
         jobStatus: 'accepted',
         appStatus: '',
